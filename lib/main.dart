@@ -11,12 +11,13 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.blue,
         inputDecorationTheme: new InputDecorationTheme(
+          contentPadding: EdgeInsets.only(top: 8.0, bottom: 8.0),
           enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(
-                  width: 1.0, color: Colors.black12, style: BorderStyle.solid)),
+                  width: 0.5, color: Colors.black12, style: BorderStyle.solid)),
           focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(
-                  width: 1.0, color: Colors.blue, style: BorderStyle.solid)),
+                  width: 0.5, color: Colors.blue, style: BorderStyle.solid)),
         ),
       ),
       home: new MyHomePage(title: 'Flutter Calculate Home Page'),
