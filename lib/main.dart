@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
           contentPadding: EdgeInsets.only(top: 8.0, bottom: 8.0),
           enabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(
-                  width: 0.5, color: Colors.black12, style: BorderStyle.solid)),
+                  width: 0.5, color: Theme.of(context).dividerColor, style: BorderStyle.solid)),
           focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(
                   width: 0.5, color: Colors.blue, style: BorderStyle.solid)),

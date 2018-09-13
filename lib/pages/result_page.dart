@@ -12,13 +12,21 @@ class ResultPage extends StatefulWidget {
 }
 
 class _ResultPageState extends State<ResultPage> {
+  bool _formulaOffstage = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: _buildBody(),
+      body: _buildScroll(),
+    );
+  }
+
+  _buildScroll() {
+    return SingleChildScrollView(
+      child: _buildBody(),
     );
   }
 
@@ -215,6 +223,7 @@ class _ResultPageState extends State<ResultPage> {
             ],
           ),
         ),
+        _buildDetail(),
         Padding(
           padding: EdgeInsets.all(16.0),
           child: Row(
@@ -239,6 +248,196 @@ class _ResultPageState extends State<ResultPage> {
         ),
       ],
     );
+  }
+
+  _buildDetail() {
+    Widget detailWidget = Column(
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(top: 16.0, bottom: 16.0),
+          child: GestureDetector(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('${_formulaOffstage ? '展开' : '收起'}计算公式',
+                    style: Theme.of(context)
+                        .textTheme
+                        .body1
+                        .copyWith(color: Colors.blue)),
+                Icon(
+                  _formulaOffstage
+                      ? Icons.keyboard_arrow_down
+                      : Icons.keyboard_arrow_up,
+                  color: Colors.black26,
+                ),
+              ],
+            ),
+            onTap: () {
+              setState(() {
+                _formulaOffstage = !_formulaOffstage;
+              });
+              print('gest');
+            },
+          ),
+        ),
+        Offstage(
+          offstage: _formulaOffstage,
+          child: Column(
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+                //padding: EdgeInsets.all(16.0),
+                decoration: ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Theme.of(context).dividerColor, width: 0.0),
+                  borderRadius: BorderRadius.circular(2.0),
+                )),
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      height: 4.0,
+                      //padding: EdgeInsets.all(16.0),
+                      decoration: ShapeDecoration(
+                          color: Colors.lightBlueAccent.withOpacity(0.3),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(3.5),
+                                topRight: Radius.circular(3.5)),
+                          )),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Text(
+                                '税后工资',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(color: Colors.black87),
+                              ),
+                              Container(
+                                width: 8.0,
+                              ),
+                              Text(
+                                '${widget.salary.salaryAfter}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            height: 8.0,
+                          ),
+                          Text(
+                            '税前工资(${widget.salary.salaryBefore})-社保个人缴纳(${widget.salary.social})-公积金个人缴纳(${widget.salary.funds})-个人所得税(${widget.salary.tax})',
+                            style: Theme.of(context).textTheme.caption,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(
+                      height: 1.0,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Text(
+                                '个人所得税',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(color: Colors.black87),
+                              ),
+                              Container(
+                                width: 8.0,
+                              ),
+                              Text(
+                                '${widget.salary.tax}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            height: 8.0,
+                          ),
+                          Text(
+                            '应纳税所得额(${widget.salary.taxAmount}) *税率(${widget.salary.taxRate})-速算扣除数(${widget.salary.taxQuickDeduction})',
+                            style: Theme.of(context).textTheme.caption,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(
+                      height: 1.0,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Text(
+                                '应纳税所得额',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(color: Colors.black87),
+                              ),
+                              Container(
+                                width: 8.0,
+                              ),
+                              Text(
+                                '${widget.salary.taxAmount}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            height: 8.0,
+                          ),
+                          Text(
+                            '税前工资(${widget.salary.salaryBefore})-社保个人缴纳(${widget.salary.social})-公积金个人缴纳(${widget.salary.funds})-起征点(${widget.salary.taxThreshold})',
+                            style: Theme.of(context).textTheme.caption,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    detailWidget = Container(
+      color: Colors.white,
+      child: detailWidget,
+    );
+    return detailWidget;
   }
 
   _rectDot({Color color}) {
