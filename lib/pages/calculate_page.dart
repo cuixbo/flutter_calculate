@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_calculate/models/salary.dart';
 import 'package:flutter_calculate/page_router.dart';
+import 'package:flutter_calculate/pages/dialog.dart';
 import 'package:flutter_calculate/pages/result_page.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -55,9 +56,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+//      appBar: AppBar(
+//        title: Text(widget.title),
+//      ),
+      appBar: null,
       body: _buildBg(),
     );
   }
@@ -289,8 +291,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           '社保基数:',
                           style: Theme.of(context).textTheme.body1,
                         ),
-                        Icon(Icons.info_outline,
-                            size: 14.0, color: Colors.blue),
+                        InkWell(
+                          child: Icon(Icons.info_outline,
+                              size: 14.0, color: Colors.blue),
+                          onTap: () => DialogTip.showSocialTip(context),
+                        ),
                       ],
                     ),
                     TextFormField(
@@ -344,8 +349,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           '公积金基数:',
                           style: Theme.of(context).textTheme.body1,
                         ),
-                        Icon(Icons.info_outline,
-                            size: 14.0, color: Colors.blue),
+                        InkWell(
+                          child: Icon(Icons.info_outline,
+                              size: 14.0, color: Colors.blue),
+                          onTap: () => DialogTip.showFundTip(context),
+                        ),
                       ],
                     ),
                     TextFormField(
@@ -418,7 +426,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _checkBtnEnable() {
-//    print('_checkBtnEnable');
     var enabled = false;
     if (_textEditController1.text.isNotEmpty &&
         _textEditController3.text.isNotEmpty &&
@@ -430,7 +437,6 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _btnCalculateEnabled = enabled;
     });
-//    print('$_btnCalculateEnabled');
   }
 
   _checkSocial() {
@@ -473,66 +479,35 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  //个人所得税=（工资－五险一金个人缴纳部分－免征额）×税率-速算扣除数
   _calculate() {
-//   3%  0
-//   10% 210
-//   20% 1410
-//   25% 2660
-//   30% 4410
-//   35% 7160
-//   45% 15160
-    //个人所得税=（工资－五险一金个人缴纳部分－免征额）×税率-速算扣除数
-    print('_calculate');
-    num salaryAfter = 0;
     //社保 养老8%，失业0.2%，医疗2%+3；(工伤和生育 个人不缴)
     num social = _socialSecurity * (0.08 + 0.002 + 0.02) + 3;
     social = _switchValue ? social : 0.0;
     social = num.parse(social.toStringAsFixed(2));
+
+    //公积金
     num funds = _houseFunds * 0.12; //公积金 12%
     funds = _switchValue ? funds : 0.0;
     funds = num.parse(funds.toStringAsFixed(2));
+
     //应纳税所得额:（工资－五险一金个人缴纳部分－免征额）
     num taxAmount = _salaryBefore - social - funds - _taxThreshold;
-    taxAmount = num.parse(taxAmount.toStringAsFixed(2));
-    num tax = 0; //应缴税:应纳税所得额×税率-速算扣除数
-    num taxQuickDeduction = 0;
-    num taxRate = 0;
-    if (taxAmount <= 0) {
-      taxRate = 0;
-      taxQuickDeduction = 0;
-      tax = 0;
-    } else if (taxAmount <= 3000) {
-      taxRate = 0.03;
-      taxQuickDeduction = 0;
-      tax = taxAmount * 0.03 - 0;
-    } else if (taxAmount < 12000) {
-      taxRate = 0.10;
-      taxQuickDeduction = 210;
-      tax = taxAmount * 0.10 - 210;
-    } else if (taxAmount < 25000) {
-      taxRate = 0.20;
-      taxQuickDeduction = 1410;
-      tax = taxAmount * 0.20 - 1410;
-    } else if (taxAmount < 35000) {
-      taxRate = 0.25;
-      taxQuickDeduction = 2660;
-      tax = taxAmount * 0.25 - 2660;
-    } else if (taxAmount < 55000) {
-      taxRate = 0.30;
-      taxQuickDeduction = 4410;
-      tax = taxAmount * 0.30 - 4410;
-    } else if (taxAmount < 80000) {
-      taxRate = 0.35;
-      taxQuickDeduction = 7160;
-      tax = taxAmount * 0.35 - 7160;
-    } else {
-      taxRate = 0.45;
-      taxQuickDeduction = 15160;
-      tax = taxAmount * 0.45 - 15160;
-    }
+    taxAmount <= 0
+        ? taxAmount = 0.0
+        : taxAmount = num.parse(taxAmount.toStringAsFixed(2));
+
+    //对应税率
+    TaxRate taxRate = TaxRate.whichTaxRate(taxAmount);
+
+    //应缴税:应纳税所得额×税率-速算扣除数
+    num tax = taxAmount * taxRate.rate - taxRate.quickDeduction;
     tax = num.parse(tax.toStringAsFixed(2));
-    salaryAfter = _salaryBefore - social - funds - tax; //税后所得:税前工资－五险-一金－缴税
+
+    //税后所得:税前工资－五险-一金－缴税
+    num salaryAfter = _salaryBefore - social - funds - tax;
     salaryAfter = num.parse(salaryAfter.toStringAsFixed(2));
+
     var salary = Salary(
       salaryBefore: _salaryBefore,
       salaryAfter: salaryAfter,
@@ -542,7 +517,6 @@ class _MyHomePageState extends State<MyHomePage> {
       tax: tax,
       taxThreshold: _taxThreshold,
       taxRate: taxRate,
-      taxQuickDeduction: taxQuickDeduction,
     );
     print('salary:$salary');
 
@@ -553,7 +527,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     Navigator.of(context).push(SlidePageRouter().pageBuilder(ResultPage(
-      title: 'Result',
+      title: '税后工资',
       salary: salary,
     )));
   }
@@ -635,27 +609,5 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           );
         });
-
-//    showDialog(
-//        context: context,
-//        builder: (BuildContext context) {
-//          return new SimpleDialog(
-//            title: const Text('Select assignment'),
-//            children: <Widget>[
-//              new SimpleDialogOption(
-//                onPressed: () {
-//
-//                },
-//                child: const Text('Treasury department'),
-//              ),
-//              new SimpleDialogOption(
-//                onPressed: () {
-//
-//                },
-//                child: const Text('State department'),
-//              ),
-//            ],
-//          );
-//        });
   }
 }

@@ -1,5 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calculate/models/salary.dart';
+import 'package:flutter_calculate/pages/dialog.dart';
+import 'package:flutter_calculate/widgets/icon_span.dart';
 
 class ResultPage extends StatefulWidget {
   final String title;
@@ -13,13 +16,19 @@ class ResultPage extends StatefulWidget {
 
 class _ResultPageState extends State<ResultPage> {
   bool _formulaOffstage = true;
+  var _c1 = Color(0xff0c83ff);
+  var _c2 = Color(0xff81c7fb);
+  var _c3 = Color(0xffb5ddfa);
+  var _c4 = Color(0xffe1f2fd);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        elevation: 0.0,
       ),
+//      appBar: null,
       body: _buildScroll(),
     );
   }
@@ -109,7 +118,8 @@ class _ResultPageState extends State<ResultPage> {
           child: Column(
             children: <Widget>[
               Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding:
+                      EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
@@ -124,16 +134,61 @@ class _ResultPageState extends State<ResultPage> {
                       ),
                     ],
                   )),
-              Divider(
-                height: 1.0,
-                indent: 16.0,
+              Container(
+                padding: EdgeInsets.only(left: 16.0, right: 16.0),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      flex: 10000 *
+                          widget.salary.salaryAfter ~/
+                          widget.salary.salaryBefore,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: _c1,
+                            borderRadius: BorderRadius.horizontal(
+                                left: Radius.circular(2.0))),
+                        height: 16.0,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 10000 *
+                          widget.salary.social ~/
+                          widget.salary.salaryBefore,
+                      child: Container(
+                        height: 16.0,
+                        color: _c2,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 10000 *
+                          widget.salary.funds ~/
+                          widget.salary.salaryBefore,
+                      child: Container(
+                        height: 16.0,
+                        color: _c3,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 10000 *
+                          widget.salary.tax ~/
+                          widget.salary.salaryBefore,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: _c4,
+                            borderRadius: BorderRadius.horizontal(
+                                right: Radius.circular(2.0))),
+                        height: 16.0,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      _rectDot(color: Color(0xff0c83ff)),
+                      _rectDot(color: _c1),
                       Text(
                         ' 税后工资',
                         style: _textStyle(),
@@ -156,7 +211,7 @@ class _ResultPageState extends State<ResultPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      _rectDot(color: Color(0xff81c7fb)),
+                      _rectDot(color: _c2),
                       Text(
                         ' 社保缴纳(个人)',
                         style: _textStyle(),
@@ -179,7 +234,7 @@ class _ResultPageState extends State<ResultPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      _rectDot(color: Color(0xffb5ddfa)),
+                      _rectDot(color: _c3),
                       Text(
                         ' 公积金缴纳(个人)',
                         style: _textStyle(),
@@ -202,7 +257,7 @@ class _ResultPageState extends State<ResultPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      _rectDot(color: Color(0xffe1f2fd)),
+                      _rectDot(color: _c4),
                       Text(
                         ' 个税缴纳',
                         style: _textStyle(),
@@ -276,7 +331,6 @@ class _ResultPageState extends State<ResultPage> {
               setState(() {
                 _formulaOffstage = !_formulaOffstage;
               });
-              print('gest');
             },
           ),
         ),
@@ -289,7 +343,8 @@ class _ResultPageState extends State<ResultPage> {
                 //padding: EdgeInsets.all(16.0),
                 decoration: ShapeDecoration(
                     shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Theme.of(context).dividerColor, width: 0.0),
+                  side: BorderSide(
+                      color: Theme.of(context).dividerColor, width: 0.0),
                   borderRadius: BorderRadius.circular(2.0),
                 )),
                 child: Column(
@@ -377,9 +432,31 @@ class _ResultPageState extends State<ResultPage> {
                           Container(
                             height: 8.0,
                           ),
-                          Text(
-                            '应纳税所得额(${widget.salary.taxAmount}) *税率(${widget.salary.taxRate})-速算扣除数(${widget.salary.taxQuickDeduction})',
-                            style: Theme.of(context).textTheme.caption,
+                          RichText(
+                            textAlign: TextAlign.left,
+                            text: TextSpan(children: [
+                              TextSpan(
+                                  text:
+                                      '应纳税所得额(${widget.salary.taxAmount}) *税率(${widget.salary.taxRate.rate * 100}%)',
+                                  style: Theme.of(context).textTheme.caption),
+                              IconSpan(
+                                  icon: Icons.help_outline,
+                                  color: Colors.blue,
+                                  fontSize: 13.0,
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) => TaxRateDialog(
+                                                taxRate: widget.salary.taxRate,
+                                              ));
+//                                    DialogTip.showTaxRateDialog(context);
+                                    }),
+                              TextSpan(
+                                  text:
+                                      '-速算扣除数(${widget.salary.taxRate.quickDeduction})',
+                                  style: Theme.of(context).textTheme.caption),
+                            ]),
                           ),
                         ],
                       ),
@@ -400,6 +477,14 @@ class _ResultPageState extends State<ResultPage> {
                                     .textTheme
                                     .caption
                                     .copyWith(color: Colors.black87),
+                              ),
+                              GestureDetector(
+                                child: Icon(
+                                  Icons.help_outline,
+                                  color: Colors.blue,
+                                  size: 13.0,
+                                ),
+                                onTap: ()=>DialogTip.showTaxAmountTip(context),
                               ),
                               Container(
                                 width: 8.0,
