@@ -301,6 +301,14 @@ class _ResultPageState extends State<ResultPage> {
             ],
           ),
         ),
+        Padding(
+          padding: EdgeInsets.only(bottom:16.0),
+          child: Text(
+            '此应用UI设计参考仁励窝支付宝小程序\n如有侵权请联系cuixbo@qq.com',
+            style: Theme.of(context).textTheme.caption,
+            textAlign: TextAlign.center,
+          ),
+        ),
       ],
     );
   }
@@ -484,7 +492,8 @@ class _ResultPageState extends State<ResultPage> {
                                   color: Colors.blue,
                                   size: 13.0,
                                 ),
-                                onTap: ()=>DialogTip.showTaxAmountTip(context),
+                                onTap: () =>
+                                    DialogTip.showTaxAmountTip(context),
                               ),
                               Container(
                                 width: 8.0,
